@@ -14,7 +14,7 @@ public class Test {
         List<Person> perList2=CreateData.createRandomPersonsList(10);
 
         // конкатенация стримов и дальнешая фильтрация с целью добавления отфильтрованных и обьединенных данных в коллекцию
-        depList.get(0).setDepartmentWorkers(Stream.concat(perList1.stream(),perList2.stream()).filter(p->p.sex==true).
+        depList.get(0).setDepartmentWorkers(Stream.concat(perList1.stream(),perList2.stream()).filter(p->p.sex).
                 collect(Collectors.toList()));
         // сортировка
         depList.get(1).setDepartmentWorkers(perList1.stream().sorted().collect(Collectors.toList()));
@@ -38,8 +38,16 @@ public class Test {
         Map <Integer, List <Person>> personByAge=perList1.stream().collect(Collectors.groupingBy(p->p.getAge()));
         // группировка в мапу по логике
         Map <Boolean, List <Person>> personBySex=Stream.concat(perList1.stream(),perList2.stream())
-                        .collect(Collectors.partitioningBy(person -> person.isSex()==true));
+                        .collect(Collectors.partitioningBy(person -> person.isSex()));
+        // группирвка с двойным параметром
+        Map<String,Double>map=Stream.concat(perList1.stream(),perList2.stream())
+                .collect(Collectors.groupingBy(person -> person.getOccupation(),Collectors.averagingDouble(person->person.getSalary())));
+        // группировка по профессии(ключь) где значение мапа(ключ - имя фамилия) значение возраст, вложенная группировка
+        Map<String, Map<String, List<Integer>>> map2= Stream.concat(perList1.stream(),perList2.stream())
+                        .collect(Collectors.groupingBy(Person::getOccupation,
+                                Collectors.groupingBy(person -> person.getName()+" "+person.getSurname(), Collectors.mapping(Person::getAge, Collectors.toList()))));
 
+        System.out.println(map2);
         System.out.println("first worker below age 30: "+worker.get()+"\n ------------------");
         System.out.println("average salary of workers at all departments: "+averageSalary+"\n ------------------");
 
